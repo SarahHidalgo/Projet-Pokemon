@@ -10,8 +10,8 @@ typedef struct Pokemon
 }Pokemon;
 
 
-void Powerup(Pokemon& p);
-void evolve(Pokemon& p);
+void Powerup(Pokemon* p);
+void evolve(Pokemon* p, const char* Evolution);
 void display(const Pokemon p, EspecePokemon bestiaire[150], const char* typesLabel[18]);
 
 

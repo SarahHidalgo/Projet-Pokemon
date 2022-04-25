@@ -8,11 +8,11 @@
 long random_at_most(long max) 
 {
 	unsigned long
-		// max <= RAND_MAX < ULONG_MAX, so this is okay.
-		num_bins = (unsigned long)max + 1,
-		num_rand = (unsigned long)RAND_MAX + 1,
-		bin_size = num_rand / num_bins,
-		defect = num_rand % num_bins;
+	// max <= RAND_MAX < ULONG_MAX, so this is okay.
+	num_bins = (unsigned long)max + 1,
+	num_rand = (unsigned long)RAND_MAX + 1,
+	bin_size = num_rand / num_bins,
+	defect = num_rand % num_bins;
 	long x;
 	do 
 	{

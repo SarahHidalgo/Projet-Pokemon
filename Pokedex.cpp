@@ -10,7 +10,7 @@ Pokedex* initPokedex(const int size)
 {
 	Pokedex* monPokedex = (Pokedex*)malloc(sizeof(Pokedex)); //new Pokedex (autres façons de faire)
 	//le pointeur pokedex pointe vers la structure Pokedex
-	monPokedex->mesPokemons = (Pokemon*)malloc(sizeof(Pokemon) * size); //new Pokemon[size]
+	monPokedex->mesPokemons = new Pokemon[size]; // (Pokemon*)malloc(sizeof(Pokemon) * size) 
 	monPokedex->nb = 0;
 	monPokedex->capacity = size;
 
@@ -67,13 +67,19 @@ void insertPokemon(Pokedex* pokedex, Pokemon p)
 	pokedex->nb = pokedex->nb + 1;
 }
 
-void displayPokedex(Pokedex * pokedex, EspecePokemon bestiaire[150], const char* typesLabel[18])
+void displayPokedex(Pokedex * pokedex, EspecePokemon bestiaire[150], const char* typesLabel[18], Ressource Ressources)
 {
+	cout << "-----------------------" << endl;
+	cout << endl << "Mes ressources : " << endl;
+	cout << Ressources.candies << " bonbons " << endl;
+	cout << Ressources.stardust << " poussieres d'etoiles " << endl;
+	cout << "-----------------------" << endl;
 	cout << endl << "Contenu du pokedex (Actuellement ";
-	cout << pokedex->nb << " pokemons capturés)" << endl;
+	cout << pokedex->nb << " pokemons captures)" << endl;
 	for (int i = 0; i < pokedex->nb; i++)
 	{
 		display(pokedex->mesPokemons[i], bestiaire, typesLabel);
+		cout << "-----------------------" << endl;
 	}
 }
 

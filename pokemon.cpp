@@ -3,14 +3,17 @@
 #include <iostream>
 using namespace std;
 
-void evolve(Pokemon& p)
+void evolve(Pokemon* p, const char* Evolution)
 {
-	p.evolution += 1;
+	const char* anciennom = p->nom;
+	p->nom = Evolution;
+	p->evolution += 1;
+	cout << endl << "Félicitations, votre " << anciennom << " est devenu un " << Evolution << " ! " << endl << endl;
 }
 
-void Powerup(Pokemon& p)
+void Powerup(Pokemon* p)
 {
-	p.cp = (int)(p.cp*1.25);
+	p->cp = (int)(p->cp*1.25);
 }
 
 void display(const Pokemon p, EspecePokemon bestiaire[150], const char* typesLabel[18])

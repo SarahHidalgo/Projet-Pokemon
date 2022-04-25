@@ -864,8 +864,10 @@ void displayBestiaire(EspecePokemon bestiaire[]) {
 EspecePokemon entierBestiaire(EspecePokemon bestiaire[],const char* nom)
 {
     int i = 0;
-    while (i < 150) {
-        if (strcmp(bestiaire[i].nom, nom) == 0) {
+    while (i < 150) 
+    {
+        if (strcmp(bestiaire[i].nom, nom) == 0) 
+        {
             return bestiaire[i];
         }
         i++;

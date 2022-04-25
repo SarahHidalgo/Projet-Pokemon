@@ -3,6 +3,8 @@
 #include "bestiaire.h"
 #include "Pokedex.h"
 #include "utils.h"
+#include "historique.h"
+#include "combat.h"
 #include <iostream>
 using namespace std;
 
@@ -43,12 +45,22 @@ void Bestiaire(EspecePokemon bestiaire[]) {
     displayBestiaire(bestiaire);
 } 
 
-void powerupAndEvolution(Pokemon p,EspecePokemon bestiaire[150], const char* typesLabel[18]) {
+void powerupAndEvolution(Pokedex*pokedex,EspecePokemon bestiaire[150], Ressource & Ressources, Historique *historique,Evolution *evolution) 
+{
     int newchoice = 0;
+    int idPokemon = -1;
+
+    do
+    {
+        cout << "Choisir l'identifiant du pokemon à faire évoluer ou progresser." << endl;
+        cin >> idPokemon;
+    } while (idPokemon < 0);
+
     cout << "Choisir l'action à réaliser : " << endl;
     cout << " 1 - Powerup" << endl;
     cout << " 2 - Evolution" << endl;
     cout << " 3 - Retour au menu principal" << endl;
+
 
     do {
         cin >> newchoice;
@@ -57,27 +69,79 @@ void powerupAndEvolution(Pokemon p,EspecePokemon bestiaire[150], const char* typ
         }
     } while (newchoice != 1 && newchoice != 2 && newchoice != 3);
 
-    display(p,bestiaire,typesLabel);
-    if (newchoice == 1) {
-        Powerup(p);
+    Pokemon* p = &(pokedex->mesPokemons[idPokemon]);
+
+    if (newchoice == 1) 
+    {
+        if (Ressources.candies >= 10 && Ressources.stardust >= 500)
+        {
+            Ressources.candies = Ressources.candies - 10;
+            Ressources.stardust = Ressources.stardust - 500;
+            Powerup(p);
+        }
+        else
+        {
+            cout << "Power-up impossible : 10 bonbons et 500 poussières sont nécessaires ";
+        }
     }
-    else if (newchoice == 2) {
-        evolve(p);
+    else if (newchoice == 2)
+    {
+        int i = 0;
+        while (i < 150 && strcmp(p->nom, bestiaire[i].nom) != 0) 
+        {
+            i++;
+        }
+
+        // identifier le nom de l'espece vers laquelle le pokemon evolue
+        const char* Evolution = bestiaire[i].evolvesTo;
+
+        // connaitre le nombre de bonbons nécessaires pour cette évolution
+        int BonbonsNecessaires = bestiaire[i].nbBonbonsPourEvoluer;
+
+        if (Evolution == nullptr) {
+            cout << "Evolution impossible: le pokemon est deja dans sa derniere evolution !";
+        }
+        else {
+            if (Ressources.candies < BonbonsNecessaires) 
+            {
+                cout << "Evolution impossible : " << BonbonsNecessaires << " bonbons sont nécessaires ";
+            }
+            else 
+            {
+                Ressources.candies = Ressources.candies - BonbonsNecessaires; // mise à jour du nombre de bonbons en possession
+                insertionliste(evolution,historique, p, bestiaire); // insertion du maillon du pokemon evolue dans la liste chainees
+                evolve(p, Evolution); 
+            }
+        }
+
     }
-    cout << "-----------------"<<endl;
-    display(p,bestiaire,typesLabel);
 }
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[]) 
+{
+
     EspecePokemon bestiaire[150]; /* tableau de 150 EspecePokemon*/
     initBestiaire(bestiaire); /*on initialise le tableau bestiaire*/
+    
+    // Initialisation des ressources
+    Ressource Ressources{};
+    Ressources.candies = 250;
+    Ressources.stardust = 1200;
 
-    /*Pokemon p;//nitialisation du Pokemon p
-    p.PV = 86;
-    p.CP = 1500;
-    p.XP = 657;
-    p.evolution = 2;
-    p.nom = "Seadra";*/
+    CombatHash* hashtable = initCombatHash(); //initialisation de hashtable
+
+    // Initialisation de la liste chainee :
+
+    Historique* histo = (Historique*)malloc(sizeof(struct Historique));
+    Evolution* evolution = (Evolution*)malloc(sizeof(struct Evolution));
+
+    //initialisation du premier maillon (qui est vide/nul?)
+    evolution->from = nullptr;
+    evolution->to = nullptr;
+    evolution->nextEvol = NULL;
+    histo->debut = evolution; // on "accroche historique au maillon initialise
+    histo->nombre = 0;
+
     
     const char* typesLabel[18] = { "Normal", "Fighting", "Flying", "Poison", "Ground", "Rock",
          "Bug", "Ghost", "Steel", "Fire", "Grass", "Water", "Electric", "Psychic",
@@ -85,14 +149,14 @@ int main(int argc, const char* argv[]) {
    
     Pokedex* pokedex = initPokedex(4);
     Pokemon a;
-    a.nom = "Seadra";
+    a.nom = "Bulbasaur";
     a.xp = 1;
     a.cp = 4;
-    a.evolution = 1;
+    a.evolution = 0;
     a.pv = 23;
 
     Pokemon b;
-    b.nom = "Arbok";
+    b.nom = "Charmander";
     b.xp = 0;
     b.cp = 123;
     b.evolution = 2;
@@ -120,32 +184,13 @@ int main(int argc, const char* argv[]) {
     e.pv = 290;
 
     insertPokemon(pokedex, a);
-    cout << "******* Pokedex after inserting pokemon a *********" << endl;
-    displayPokedex(pokedex, bestiaire, typesLabel);
-    cout << "***************************************************" << endl << endl << endl;
-
     insertPokemon(pokedex, b);
-    cout << "******* Pokedex after inserting pokemon b *********" << endl;
-    displayPokedex(pokedex, bestiaire, typesLabel);
-    cout << "***************************************************" << endl << endl << endl;
-
     insertPokemon(pokedex, c);
-    cout << "******* Pokedex after inserting pokemon c *********" << endl;
-    displayPokedex(pokedex, bestiaire, typesLabel);
-    cout << "***************************************************" << endl << endl << endl;
-
     insertPokemon(pokedex, d);
-    cout << "******* Pokedex after inserting pokemon d *********" << endl;
-    displayPokedex(pokedex, bestiaire, typesLabel);
-    cout << "***************************************************" << endl << endl << endl;
-
     insertPokemon(pokedex, e);
-    cout << "******* Pokedex after inserting pokemon e *********" << endl;
-    displayPokedex(pokedex, bestiaire, typesLabel);
+    displayPokedex(pokedex, bestiaire, typesLabel, Ressources);
     cout << "***************************************************" << endl << endl << endl;
-
-
-
+   
     int choice = 6;
    
     cout << "                                   .::.                            " << endl;
@@ -172,7 +217,7 @@ int main(int argc, const char* argv[]) {
             Bestiaire(bestiaire);
             break;
         case 2:
-            displayPokedex(pokedex, bestiaire, typesLabel);
+            displayPokedex(pokedex, bestiaire, typesLabel, Ressources);
             break;
         case 3:
             int newchoice;
@@ -181,7 +226,7 @@ int main(int argc, const char* argv[]) {
                 Pokemon p = genererPokemon(bestiaire, typesLabel);
                 cout << endl << endl;;
                 cout << " Que voulez-vous faire ? " << endl;
-                cout << " 1 - Capturer un pokemon" << endl;
+                cout << " 1 - Essayer de capturer le pokemon" << endl;
                 cout << " 2 - Ne pas attraper le pokemon" << endl;
 
                 do
@@ -190,7 +235,6 @@ int main(int argc, const char* argv[]) {
                     if (newchoice != 1 && newchoice != 2)
                     {
                         cout << "Mauvais choix, saisir 1 ou 2" << endl;
-                        cout << "Saisir 1 ou 2" << endl;
                         cin >> newchoice;
                     }
                 } while (newchoice != 1 && newchoice != 2);
@@ -202,6 +246,8 @@ int main(int argc, const char* argv[]) {
                     {
                         insertPokemon(pokedex, p);
                         cout << "Vous avez attraper le pokemon " << endl;
+                        Ressources.candies += 3000; // remettre 3 après le test
+                        Ressources.stardust += 100;
                     }
                     else
                     {
@@ -221,12 +267,18 @@ int main(int argc, const char* argv[]) {
                 }
 
             } while (newchoice != 3);
-            displayPokedex(pokedex, bestiaire, typesLabel);
+            displayPokedex(pokedex, bestiaire, typesLabel, Ressources);
             break;
         case 4:
-            powerupAndEvolution(a, bestiaire, typesLabel);
+            int choice;
+            displayPokedex(pokedex, bestiaire, typesLabel, Ressources);
+            cout << "-----------------------" << endl;
+            powerupAndEvolution(pokedex, bestiaire, Ressources,histo,evolution);
+            afficherListe(histo);
             break;
         case 5:
+            displayPokedex(pokedex, bestiaire, typesLabel, Ressources);
+            combat(hashtable,pokedex,bestiaire);
             break;
         case 6:
             std::cout << "Good bye, we will ctach 'em all later!\n";
